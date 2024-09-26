@@ -3,15 +3,7 @@
 #include <string.h>
 #include <inttypes.h>
 
-long long int array[94];
 
-/*int64_t fib_wrapper(int num) 
-{
-   
-
-
-   return 0;
-}*/
 int64_t iterative(int s)
 {
    int64_t  prev_num = 0;
@@ -27,7 +19,7 @@ int64_t iterative(int s)
    return current_num;
 }
 
-int64_t recursive(int n)
+int64_t recursive_wrap(int n, int64_t *memo)
 {
    if(n == 1)
    {
@@ -37,15 +29,29 @@ int64_t recursive(int n)
    {
       return 1;
    }
-   else if(array[n] != -1)
+   else if(memo[n] != 4)
    {
-      return array[n];
+      return memo[n];
    }
    else
    {
-      array[n] = (recursive(n - 1) + recursive(n-2));
-      return array[n];
+      memo[n] = (recursive_wrap(n - 1, memo) + recursive_wrap(n-2, memo));
+      return memo[n];
    }
+}
+
+int64_t fib_memo(int user_num) 
+{
+   int64_t *memo = (int64_t *)malloc((user_num + 1) * sizeof(int64_t));
+    
+    for (int i = 0; i <= user_num; i++) 
+    {
+        memo[i] = 4;
+    }
+
+    int64_t result = recursive_wrap(user_num, memo);
+
+    return result;
 }
 
 int main(int argc, char* argv[]) 
@@ -61,12 +67,7 @@ int main(int argc, char* argv[])
    }
    else
    {
-      for (int i = 0; i <= user_number; i++) 
-      {
-        array[i] = -1;
-      }
-
-      fibo = recursive(user_number);
+      fibo = fib_memo(user_number);
    }
    //fprintf(saved, "%d %" PRIi64 "\n", sum, fibo);
    printf("%" PRIi64 "\n", fibo);
