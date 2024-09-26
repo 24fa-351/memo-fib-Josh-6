@@ -3,14 +3,13 @@
 #include <string.h>
 #include <inttypes.h>
 
-
 int64_t iterative(int s)
 {
-   int64_t  prev_num = 0;
-   int64_t  saved_num = 1;
-   int64_t  current_num;
+   int64_t prev_num = 0;
+   int64_t saved_num = 1;
+   int64_t current_num;
 
-   for(int i = 2; i < s; i++)
+   for (int i = 2; i < s; i++)
    {
       current_num = prev_num + saved_num;
       prev_num = saved_num;
@@ -19,58 +18,67 @@ int64_t iterative(int s)
    return current_num;
 }
 
-int64_t recursive_wrap(int n, int64_t *memo)
+typedef int64_t (*Functionpointer)(int);
+Functionpointer fib_provider = NULL;
+
+int64_t recursive_wrap(int n)//, int64_t *memo)
 {
-   if(n == 1)
+   //printf("Recursive wrap is called: %d\n", n);
+   if (n == 1)
    {
       return 0;
    }
-   else if(n == 2)
+   else if (n == 2)
    {
       return 1;
    }
-   else if(memo[n] != 4)
-   {
-      return memo[n];
-   }
    else
    {
-      memo[n] = (recursive_wrap(n - 1, memo) + recursive_wrap(n-2, memo));
-      return memo[n];
+      return (fib_provider(n - 1) + fib_provider(n - 2));
    }
 }
-
-int64_t fib_memo(int user_num) 
+int64_t *memo = NULL;
+int64_t fib_memo(int user_num)
 {
-   int64_t *memo = (int64_t *)malloc((user_num + 1) * sizeof(int64_t));
-    
-    for (int i = 0; i <= user_num; i++) 
-    {
-        memo[i] = 4;
-    }
-
-    int64_t result = recursive_wrap(user_num, memo);
-
-    return result;
+   if (memo == NULL)
+   {
+      memo = (int64_t *)malloc((1000) * sizeof(int64_t));
+      for (int i = 0; i < 1000; i++)
+      {
+         memo[i] = 4;
+      }
+   }
+   if (memo[user_num] == 4)
+   {
+      memo[user_num] = recursive_wrap(user_num);
+      //printf("Adding to cache: %d\n", user_num);
+   }
+   /*else
+   {
+      printf("Recieving from cache: %d\n", user_num);
+   }*/
+   return memo[user_num];
 }
 
-int main(int argc, char* argv[]) 
+int main(int argc, char *argv[])
 {
 
    int user_number = atoi(argv[1]);
 
    int64_t fibo;
-   
+
    if (strcmp(argv[2], "i") == 0)
    {
       fibo = iterative(user_number);
    }
    else
    {
-      fibo = fib_memo(user_number);
+      fib_provider = fib_memo;
+      fibo = fib_provider(user_number);
+
    }
-   //fprintf(saved, "%d %" PRIi64 "\n", sum, fibo);
-   printf("%" PRIi64 "\n", fibo);
    
+   printf("%" PRIi64 "\n", fibo);
+
    return 0;
 }
